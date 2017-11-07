@@ -1,0 +1,55 @@
+---
+driver:
+  name: ec2
+  aws_ssh_key_id: TestKey
+  security_group_ids: ["sg-4000000"]
+  region: us-west-2
+  shared_credentials_profile: dev
+  subnet_id: subnet-00000
+  instance_type: t1.micro
+  associate_public_ip: false
+  interface: private
+  provision: true
+  user_data: 'C:\Users\workspace\devops-space\pre_kitchen\earlykey.sh'
+  user_data: 'rewrite-etc-hosts.sh'
+  tags:
+   Name: KitchenTest
+   department: it
+   application: test
+   division: technology
+   environment: dev
+   role: web
+
+verifier:
+  name: inspec
+
+provisioner:
+  name: chef_zero
+  cookbook_path: 'C:\Users\workspace\chef-test'
+  environments_path: 'C:\Users\workspace\devops-space\environments'
+  data_bags_path: 'C:\Users\cgarcia1\workspace\devops-space\data_bags\'
+  encrypted_data_bag_secret_key_path: 'C:\Users\workspace\devops-space\pre_kitchen\encrypted_data_bag_secret_early'
+  client_rb:
+    environment: development
+transport:
+  ssh_key: 'C:/Users/TestKey.pem'
+  connection_timeout: 10
+  connection_retries: 5
+  username: ubuntu
+platforms:
+  - name: ubuntu-14.04
+    driver:
+      image_id: ami-00000
+      block_device_mappings:
+        - device_name: /dev/sda1
+          ebs:
+            volume_size: 20
+            delete_on_termination: true
+suites:
+  - name: default
+    data_bags_path: test/fixtures/default/data_bags
+    run_list:
+      - recipe[lamp::default]
+    verifier:
+      inspec_tests:
+        - test/smoke/default
